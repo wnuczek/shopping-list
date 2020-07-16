@@ -23,16 +23,48 @@
   <body>
     <!-- Start your project here-->
     <div class="container">
-      <div class="d-flex justify-content-center align-items-center" style="height: 100vh">
+      <div class="row">
+      <div class="col-md-6">
+      <div class="d-flex justify-content-center align-items-center flex-column" style="height: 100vh">
+        <h2>Add item:</h2>
         <div class="text-center">
-          <img
-            src="https://mdbootstrap.com/img/logo/mdb-transparent-250px.png"
-            style="width: 250px; height: 90px;"
-          />
-          <h5 class="pt-3">Thank you for using our product. We're glad you're with us.</h5>
-          <p class="pb-5">MDB Team</p>
+          <label for="productName">Nazwa produktu:</label>
+          <input type="text" name="productName" required/>
+          <div id="productNameAlert"class="alert alert-warning d-none" role="alert">
+            A simple warning alert—check it out!
+          </div>
         </div>
+        <div class="text-center">
+          <label for="productQty">Ilość:</label>
+          <input type="number" name="productQty" min="0" required/>
+        </div>
+        <div class="text-center">
+          <label><input type="radio" name="productQtyUnit" value="szt."checked>szt.</label>
+          <label><input type="radio" name="productQtyUnit" value="kg">kg</label>
+        </div>
+        <div class="text-center">
+          <label for="productCat">Kategoria:</label>
+          <input list="productCatList" name="productCat" id="productCat">
+
+          <datalist id="productCatList">
+          </datalist>
+        </div>
+        <button id="submit">Add</button>
       </div>
+      </div>
+      <div class="col-md-6">
+        <div class="d-flex justify-content-center align-items-center flex-column" style="height: 100vh">
+          <h2>List</h2>
+          <h3>Items: <span id="productListLen"></span></h3>
+          <h3>Pcs sum: <span id="productListPscSum"></span></h3>
+          <h3>Weight sum: <span id="productListWeightSum"></span></h3>
+
+          <ul id="productList">
+          </ul>
+        </div>
+
+      </div>
+    </div>
     </div>
     <!-- End your project here-->
 
