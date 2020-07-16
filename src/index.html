@@ -23,16 +23,47 @@
   <body>
     <!-- Start your project here-->
     <div class="container">
-      <div class="d-flex justify-content-center align-items-center" style="height: 100vh">
+      <div class="row">
+      <div class="col-md-6">
+      <div class="d-flex justify-content-center align-items-center flex-column" style="height: 100vh">
+        <h2>Add item:</h2>
         <div class="text-center">
-          <img
-            src="https://mdbootstrap.com/img/logo/mdb-transparent-250px.png"
-            style="width: 250px; height: 90px;"
-          />
-          <h5 class="pt-3">Thank you for using our product. We're glad you're with us.</h5>
-          <p class="pb-5">MDB Team</p>
+          <label for="productName">Nazwa produktu:</label>
+          <input type="text" name="productName"/>
         </div>
+        <div class="text-center">
+          <label for="productQty">Ilość:</label>
+          <input type="number" name="productQty" min="0"/>
+        </div>
+        <div class="text-center">
+          <label><input type="radio" name="productQtyUnit">szt.</label>
+          <label><input type="radio" name="productQtyUnit">kg</label>
+        </div>
+        <div class="text-center">
+          <label for="productCat">Kategoria:</label>
+          <select name="productCat">
+            <option>warzywa</option>
+            <option>owoce</option>
+            <option>nabiał</option>
+            <option>pieczywo</option>
+          </select>
+        </div>
+        <button id="submit">Add</button>
       </div>
+      </div>
+      <div class="col-md-6">
+        <div class="d-flex justify-content-center align-items-center flex-column" style="height: 100vh">
+          <h2>List</h2>
+          <h3>Items: <span id="productListLen"></span></h3>
+          <ul id="productList">
+            <li>dummy</li>
+            <li>dummy</li>
+            <li>dummy</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
     </div>
     <!-- End your project here-->
 
