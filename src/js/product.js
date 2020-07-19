@@ -1,13 +1,10 @@
 class Product {
-  constructor(name, qty, unit, cat) {
+  constructor(id, name, qty, unit, cat) {
+    this.id = id;
     this.name = name;
     this.qty = qty;
     this.unit = unit;
     this.cat = cat;
-  }
-
-  render() {
-    return this.name;
   }
 }
 

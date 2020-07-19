@@ -1,123 +1,177 @@
 import { Product } from './product';
 import { ProductList } from './productList';
+import { CategoryListUI } from './categoryListUI';
+import { CategoryListSingleItemUI } from './categoryListSingleItemUI';
 
 // var productList = document.getElementById('productList');
 const productList = new ProductList();
 const productListHTML = document.getElementById('productList');
 const submitButton = document.getElementById('submit');
+const alertDOM = document.getElementById('formAlert');
+
 let categoryList = ['warzywa', 'owoce', 'nabiał'];
 const categoryListHTML = document.getElementById('productCatList');
 
-var cachedCategoryList = localStorage.getItem('categoryList');
+const cachedCategoryList = localStorage.getItem('categoryList');
 if (cachedCategoryList) {
   categoryList = JSON.parse(cachedCategoryList);
 }
 
+const nameInput = document.querySelector('[name="productName"]');
+const qtyInput = document.querySelector('[name="productQty"]');
+let unitInput = document.querySelector('[name="productQtyUnit"]:checked');
+const catInput = document.querySelector('[name="productCat"]');
+
 init();
 
 document.addEventListener('click', (e) => {
-  if (e.target && e.target.className === 'deleteButton') {
-    // do something
-    deleteFromList(e.target);
+  if (e.target) {
+    switch (e.target.className) {
+      case 'addButton':
+        addToList();
+        break;
+      case 'updateButton':
+        updateProduct();
+        break;
+      case 'fas fa-times':
+        deleteFromList(e.target);
+        break;
+      case 'fas fa-edit':
+        editProduct(e.target);
+        break;
+      default:
+        break;
+    }
   }
 });
 
-submitButton.addEventListener('click', addToList);
+document.getElementById('productCat').addEventListener('focusin', (e) => {
+  e.target.value = '';
+});
+
+document.querySelectorAll('[name="productQtyUnit"]').forEach((item) => {
+  item.addEventListener('click', (e) => {
+    unitInput = e.target;
+  });
+});
 
 function init() {
   renderCategoryList();
-  renderList();
+  renderProductList();
   getProductListStats();
 }
 
 function addToList() {
   try {
-    const newProductContent = getProductDataFromInput();
-    // const id = productList.length() + 1;
-    // productListHTML.appendChild(renderSingleItem(newProductContent, id));
+    const id = productList.nextId();
+    const newProductContent = getProductDataFromInput(id);
+    if (!newProductContent) throw new Error('No product info found.');
+    alertDOM.classList.add('d-none');
     productList.add(newProductContent);
     updateProductList();
-  } catch (e) {
-    switch (e) {
-      case 'product name is required':
-        document.getElementById('productNameAlert').classList.add('d-block');
-    }
+  } catch (err) {
+    alertDOM.innerHTML = err;
+    alertDOM.classList.remove('d-none');
   }
 }
 
 function deleteFromList(item) {
-  try {
-    const parent = item.parentElement;
-    const id = parent.getAttribute('data-id');
-    productList.delete(id);
-    updateProductList();
-  } catch (e) {
-    console.log(e);
+  const parent = item.parentElement.parentElement;
+  const id = parent.getAttribute('data-id');
+
+  productList.delete(id);
+  updateProductList();
+}
+
+function editProduct(item) {
+  const parent = item.parentElement.parentElement;
+  const id = parent.getAttribute('data-id');
+
+  nameInput.setAttribute('data-id', id);
+  nameInput.value = productList.productById(id).name;
+  qtyInput.value = productList.productById(id).qty;
+  unitInput.value = productList.productById(id).unit;
+  catInput.value = productList.productById(id).cat;
+  submitButton.innerText = 'Update';
+  submitButton.classList.remove('addButton');
+  submitButton.classList.add('updateButton');
+}
+
+function updateProduct() {
+  const id = nameInput.getAttribute('data-id');
+  const updatedProduct = getProductDataFromInput(id);
+  productList.update(updatedProduct);
+  updateProductList();
+}
+
+function renderProductList() {
+  productListHTML.innerHTML = '';
+  if (productList.length() > 0) {
+    categoryList.forEach((item) => {
+      const filteredProducts = productList.categoryFilter(item);
+      if (filteredProducts.length > 0) {
+        const subList = new CategoryListUI(item);
+        for (let i = 0; i < filteredProducts.length; i++) {
+          subList.appendChild(renderSingleItem(filteredProducts[i]));
+        }
+        productListHTML.appendChild(subList);
+      }
+    });
   }
 }
 
-function renderList() {
-  productListHTML.innerHTML = '';
-  categoryList.forEach( (item) => {
-    const subList = document.createElement('ul');
-    subList.setAttribute('id', 'productList' + item);
-    const filteredProducts = productList.categoryFilter(item);
-    if (filteredProducts.length > 0) subList.appendChild(document.createTextNode(item));
-    for (let i = 0; i < filteredProducts.length; i++) {
-      // render single item
-      subList.appendChild(renderSingleItem(filteredProducts[i], i));
-    }
-    productListHTML.appendChild(subList);
-
-  });
-
-}
-
-function renderSingleItem(product, id) {
-  const item = document.createElement('li');
-  item.setAttribute('data-id', id);
-  const itemHTML = `Name: ${product.name}  Qty: ${product.qty} ${product.unit} Cat: ${product.cat}`;
-  const deleteButton = document.createElement('span');
-  deleteButton.setAttribute('class', 'deleteButton');
-  deleteButton.innerHTML = 'X';
-  item.appendChild(document.createTextNode(itemHTML));
-  item.appendChild(deleteButton);
+function renderSingleItem(product) {
+  const item = new CategoryListSingleItemUI(product);
   return item;
 }
 
 function updateProductList() {
   localStorage.setItem('shoppingList', JSON.stringify(productList.data));
-  renderList();
+  renderProductList();
   getProductListStats();
 }
 
-function getProductDataFromInput() {
-  const name = document.querySelector('[name="productName"]').value;
-  if (!name) throw 'product name is required';
-  const qty = document.querySelector('[name="productQty"]').value;
-  if (!qty) throw 'product qty is required';
-  const unit = document.querySelector('[name="productQtyUnit"]:checked').value;
-  if (!unit) throw 'product unit is required';
-  const cat = document.querySelector('[name="productCat"]').value;
-  if (!cat) throw 'product category is required';
-  if (!categoryList.includes(cat)) {
-    categoryList.push(cat);
-    categoryListHTML.appendChild(
-      document.createElement('option').appendChild(document.createTextNode(cat))
-    );
-    localStorage.setItem('categoryList', JSON.stringify(categoryList));
-  }
-  // reset inputs and warnings
-  document.querySelectorAll('.alert').forEach( (item) => {
-    item.classList.remove('d-block')
-  });
+function getProductDataFromInput(id) {
+  try {
+    if (!nameInput.value) throw new Error('product name is required');
+    if (!qtyInput.value) throw new Error('product qty is required');
+    if (!unitInput.value) throw new Error('product unit is required');
+    if (!catInput.value) throw new Error('product category is required');
 
-  const newProduct = new Product(name, qty, unit, cat);
-  return newProduct;
+    alertDOM.classList.add('d-none');
+
+    if (!categoryList.includes(catInput.value)) {
+      categoryList.push(catInput.value);
+      categoryListHTML.appendChild(
+        document.createElement('option').appendChild(document.createTextNode(catInput.value))
+      );
+      localStorage.setItem('categoryList', JSON.stringify(categoryList));
+    }
+    // console.log(nameInput.value);
+    const newProduct = new Product(
+      id,
+      nameInput.value,
+      qtyInput.value,
+      unitInput.value,
+      catInput.value
+    );
+
+    document.querySelector('[name="productName"]').value = '';
+    document.querySelector('[name="productQty"]').value = '';
+    submitButton.innerText = 'Add';
+    submitButton.classList.add('addButton');
+    submitButton.classList.remove('updateButton');
+
+    return newProduct;
+  } catch (err) {
+    alertDOM.innerHTML = err;
+    alertDOM.classList.remove('d-none');
+  }
+  // return null;
 }
 
 function renderCategoryList() {
-  categoryList.forEach( (item) => {
+  categoryList.forEach((item) => {
     const option = document.createElement('option');
     option.appendChild(document.createTextNode(item));
     categoryListHTML.appendChild(option);
@@ -125,12 +179,25 @@ function renderCategoryList() {
 }
 
 function getProductListStats() {
-  const lenElem = document.getElementById('productListLen');
-  const pscElem = document.getElementById('productListPscSum');
-  const weightElem = document.getElementById('productListWeightSum');
+  const lenElem = document.createElement('span');
+  lenElem.setAttribute('class', 'itemName');
+  const pscElem = document.createElement('span');
+  pscElem.setAttribute('class', 'itemQty');
+  const weightElem = document.createElement('span');
+  weightElem.setAttribute('class', 'itemQty');
   const len = productList.length();
-  // console.log(len);
-  lenElem.innerHTML = len;
-  pscElem.innerHTML = `${productList.sumQty('szt.')} szt.`;
+  const statsDOM = document.createElement('ul');
+  const statsDOMChild = document.createElement('li');
+
+  lenElem.innerHTML = `${len} items`;
+  pscElem.innerHTML = `${productList.sumQty('pcs.')} pcs.`;
   weightElem.innerHTML = `${productList.sumQty('kg')} kg`;
+  const subTitle = document.createElement('p');
+  subTitle.innerHTML = 'SUM:';
+  statsDOM.appendChild(subTitle);
+  statsDOMChild.appendChild(lenElem);
+  statsDOMChild.appendChild(pscElem);
+  statsDOMChild.appendChild(weightElem);
+  statsDOM.appendChild(statsDOMChild);
+  productListHTML.appendChild(statsDOM);
 }

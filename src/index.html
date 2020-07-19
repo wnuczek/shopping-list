@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta http-equiv="x-ua-compatible" content="ie=edge" />
-    <title>MDB Webpack Starter</title>
+    <title>Shopping list</title>
     <!-- Favicon -->
     <link rel="icon" href="img/mdb-favicon.ico" type="image/x-icon" />
     <!-- Font Awesome -->
@@ -18,53 +18,53 @@
     <link rel="stylesheet" href="css/index.min.css" />
     <!-- Custom styles -->
     <style></style>
+    <script>
+      function allowDrop(ev) {
+        ev.preventDefault();
+      }
+
+      function drag(ev) {
+        ev.dataTransfer.setData("text/html", ev.target.outerHTML);
+      }
+
+      function drop(ev) {
+        ev.preventDefault();
+        var data = ev.dataTransfer.getData("text/html");
+        console.log(data);
+        console.log(ev.target);
+        ev.target.appendChild(document.getElementById(data));
+      }
+    </script>
   </head>
 
   <body>
     <!-- Start your project here-->
     <div class="container">
       <div class="row">
-      <div class="col-md-6">
-      <div class="d-flex justify-content-center align-items-center flex-column" style="height: 100vh">
+      <div class="d-flex justify-content-center align-items-center flex-column col-md-3">
         <h2>Add item:</h2>
-        <div class="text-center">
-          <label for="productName">Nazwa produktu:</label>
-          <input type="text" name="productName" required/>
-          <div id="productNameAlert"class="alert alert-warning d-none" role="alert">
-            A simple warning alert—check it out!
+          <input type="text" name="productName" placeholder="Item name" required/>
+          <input type="number" name="productQty" placeholder="Quantity" min="0" step="0.2" required/>
+          <div class="radioGroup">
+            <label><input type="radio" name="productQtyUnit" id="pcs" value="pcs." checked="checked">pcs.</label>
+            <label><input type="radio" name="productQtyUnit" id="kg" value="kg">kg</label>
           </div>
-        </div>
-        <div class="text-center">
-          <label for="productQty">Ilość:</label>
-          <input type="number" name="productQty" min="0" required/>
-        </div>
-        <div class="text-center">
-          <label><input type="radio" name="productQtyUnit" value="szt."checked>szt.</label>
-          <label><input type="radio" name="productQtyUnit" value="kg">kg</label>
-        </div>
-        <div class="text-center">
-          <label for="productCat">Kategoria:</label>
-          <input list="productCatList" name="productCat" id="productCat">
+          <input list="productCatList" name="productCat" placeholder="Category" id="productCat" class="productCat">
+          <datalist id="productCatList"></datalist>
 
-          <datalist id="productCatList">
-          </datalist>
-        </div>
-        <button id="submit">Add</button>
+        <button id="submit" class="addButton">Add</button>
+        <div id="formAlert"class="alert alert-warning d-none" role="alert"></div>
       </div>
-      </div>
-      <div class="col-md-6">
-        <div class="d-flex justify-content-center align-items-center flex-column" style="height: 100vh">
-          <h2>List</h2>
-          <h3>Items: <span id="productListLen"></span></h3>
-          <h3>Pcs sum: <span id="productListPscSum"></span></h3>
-          <h3>Weight sum: <span id="productListWeightSum"></span></h3>
 
-          <ul id="productList">
-          </ul>
-        </div>
+      <div class="d-flex justify-content-center align-items-center flex-column col-md-9">
+
+        <h2>Shopping list:</h2>
+
+        <ul id="productList"></ul>
 
       </div>
-    </div>
+
+      </div>
     </div>
     <!-- End your project here-->
 
